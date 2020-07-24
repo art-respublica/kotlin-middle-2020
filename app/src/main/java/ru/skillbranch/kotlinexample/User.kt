@@ -63,11 +63,7 @@ class User private constructor(
         rawPhone: String
     ) : this(firstName, lastName, rawPhone = rawPhone, meta = mapOf("auth" to "sms")) {
         println("Secondary phone constructor")
-        val code = generateAccessCode()
-        passwordHash = encrypt(code)
-        println("Phone passwordHash is $passwordHash")
-        accessCode = code
-        sendAccessCodeToUser(rawPhone, code)
+        generateAndProcessAccessCode(rawPhone)
     }
 
     init {
@@ -104,12 +100,25 @@ class User private constructor(
         else throw IllegalArgumentException("The entered password does not match the current password")
     }
 
+    fun requestAccessCode(phone: String) {
+        println("Generating access code by request")
+        generateAndProcessAccessCode(phone)
+    }
+
     private fun encrypt(password: String): String {
         if (salt.isNullOrEmpty()) {
             salt = ByteArray(16).also { SecureRandom().nextBytes(it) }.toString()
         }
         println("Salt while encrypt $salt")
         return salt.plus(password).md5()
+    }
+
+    private fun generateAndProcessAccessCode(rawPhone: String) {
+        val code = generateAccessCode()
+        passwordHash = encrypt(code)
+        println("Phone passwordHash is $passwordHash")
+        accessCode = code
+        sendAccessCodeToUser(rawPhone, code)
     }
 
     private fun generateAccessCode(): String {
