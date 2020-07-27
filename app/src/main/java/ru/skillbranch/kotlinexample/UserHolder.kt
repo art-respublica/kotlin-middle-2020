@@ -67,7 +67,9 @@ object UserHolder {
             val salt = saltHash[0].trim()
             val hash = saltHash[1].trim()
             val rawPhone = splitted[3].trim()
-            result.add(User.loadUser(fullName, email, salt, hash, rawPhone))
+            val user = User.loadUser(fullName, email, salt, hash, rawPhone)
+            map[user.login] = user
+            result.add(user)
         }
         return result;
     }
