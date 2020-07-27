@@ -56,6 +56,22 @@ object UserHolder {
         }
     }
 
+    fun importUsers(csvList: List<String>): List<User> {
+        val result = mutableListOf<User>()
+        csvList.forEach {
+            // Полное имя пользователя; email; соль:хеш пароля; телефон
+            val splitted = it.split(";")
+            val fullName = splitted[0].trim()
+            val email = splitted[1].trim()
+            val saltHash = splitted[2].trim().split(":")
+            val salt = saltHash[0].trim()
+            val hash = saltHash[1].trim()
+            val rawPhone = splitted[3].trim()
+            result.add(User.loadUser(fullName, email, salt, hash, rawPhone))
+        }
+        return result;
+    }
+
     private fun isValidatedPhone(rawPhone: String): Boolean =
         rawPhone.simplifyPhone().contains("""^\+\d{11}$""".toRegex())
 

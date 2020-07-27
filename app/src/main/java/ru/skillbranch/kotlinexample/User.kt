@@ -66,6 +66,20 @@ class User private constructor(
         generateAndProcessAccessCode(rawPhone)
     }
 
+    // for csv
+    private constructor(
+        firstName: String,
+        lastName: String?,
+        email: String?,
+        salt: String,
+        hash: String,
+        rawPhone: String?
+    ) : this(firstName, lastName, email = email, rawPhone = rawPhone, meta = mapOf("src" to "csv")) {
+        println("Secondary csv constructor")
+        this.salt = salt
+        this.passwordHash = hash
+    }
+
     init {
         println("First init block, primary constructor was called")
 
@@ -160,6 +174,22 @@ class User private constructor(
                     email,
                     password
                 )
+                else -> throw IllegalArgumentException("Email or phone must be not null or blank")
+            }
+        }
+
+        fun loadUser(
+            fullName: String,
+            email: String? = null,
+            salt: String,
+            hash: String,
+            phone: String? = null
+        ): User {
+            val (firstName, lastName) = fullName.fullNameToPair()
+
+            return when {
+                !email.isNullOrBlank() -> User(firstName, lastName, email, salt, hash, null)
+                !phone.isNullOrBlank() -> User(firstName, lastName, null, salt, hash, phone)
                 else -> throw IllegalArgumentException("Email or phone must be not null or blank")
             }
         }
